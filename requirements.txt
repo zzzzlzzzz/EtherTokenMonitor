@@ -1,0 +1,3 @@
+python-telegram-bot>=12.1.1
+jackfruit>=0.8
+requests>=2.22.0
