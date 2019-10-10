@@ -151,22 +151,21 @@ class EtherTokenMonitorBot(Bot):
         return super().send_message(*args, **kwargs)
 
     def tick(self, context):
-        self.data_lock.acquire()
-        for user, contracts in self.data.items():
-            for contract, addresses in contracts.items():
-                for address, amount in addresses.items():
-                    with suppress(ValueError):
-                        new_amount = self.get_balance(contract, address).normalize()
-                        if amount is None:
-                            addresses[address] = new_amount
-                            context.bot.send_message(user, 'Contract {}\nAddress {}\nAmount {:f}'.
-                                                     format(contract, address, new_amount))
-                        elif new_amount != amount:
-                            delta = (new_amount - amount).normalize()
-                            context.bot.send_message(user, 'Contract {}\nAddress {}\nAmount {:f}\nDelta {:f}'.
-                                                     format(contract, address, new_amount, delta))
-        self.commit()
-        self.data_lock.release()
+        with self.data_lock:
+            for user, contracts in self.data.items():
+                for contract, addresses in contracts.items():
+                    for address, amount in addresses.items():
+                        with suppress(ValueError):
+                            new_amount = self.get_balance(contract, address).normalize()
+                            if amount is None:
+                                addresses[address] = new_amount
+                                context.bot.send_message(user, 'Contract {}\nAddress {}\nAmount {:f}'.
+                                                         format(contract, address, new_amount))
+                            elif new_amount != amount:
+                                delta = (new_amount - amount).normalize()
+                                context.bot.send_message(user, 'Contract {}\nAddress {}\nAmount {:f}\nDelta {:f}'.
+                                                         format(contract, address, new_amount, delta))
+            self.commit()
 
     @staticmethod
     def execute():
