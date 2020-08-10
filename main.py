@@ -157,8 +157,8 @@ class EtherTokenMonitorBot(Bot):
                     for address, amount in addresses.items():
                         with suppress(ValueError):
                             new_amount = self.get_balance(contract, address).normalize()
+                            addresses[address] = new_amount
                             if amount is None:
-                                addresses[address] = new_amount
                                 context.bot.send_message(user, 'Contract {}\nAddress {}\nAmount {:f}'.
                                                          format(contract, address, new_amount))
                             elif new_amount != amount:
